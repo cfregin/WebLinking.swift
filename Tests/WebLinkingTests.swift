@@ -102,6 +102,29 @@ class LinkHeaderTests: XCTestCase {
 
     XCTAssertEqual(foundLink, link)
   }
+  
+  
+  func testResponseFindLinkParametersIncludingComma(){
+    let url = URL(string: "http://test.com/")!
+    let headers = ["Link":"</api/products?page=2&per_page=20&productType=BOOK,MOVIE&state=ACTIVE>; rel=\"next\",</api/products?page=167&per_page=20&productType=BOOK,MOVIE&state=ACTIVE>; rel=\"last\",</api/products?page=1&per_page=20&productType=BOOK,MOVIE&state=ACTIVE>; rel=\"first\""]
+    let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: headers)!
+    
+    let nextLink = Link(uri: "http://test.com/api/products?page=2&per_page=20&productType=BOOK,MOVIE&state=ACTIVE", parameters: ["rel": "next"])
+    let foundNextLink = response.findLink(relation: "next")!
+    XCTAssertEqual(foundNextLink, nextLink)
+    XCTAssertEqual("http://test.com/api/products?page=2&per_page=20&productType=BOOK,MOVIE&state=ACTIVE", foundNextLink.uri)
+    
+    let lastLink = Link(uri: "http://test.com/api/products?page=167&per_page=20&productType=BOOK,MOVIE&state=ACTIVE", parameters: ["rel": "last"])
+    let foundLastLink = response.findLink(relation: "last")
+    XCTAssertEqual(foundLastLink, lastLink)
+    XCTAssertEqual("http://test.com/api/products?page=167&per_page=20&productType=BOOK,MOVIE&state=ACTIVE", foundLastLink?.uri)
+    
+    
+    let firstLink = Link(uri: "http://test.com/api/products?page=1&per_page=20&productType=BOOK,MOVIE&state=ACTIVE", parameters: ["rel": "first"])
+    let foundFirstLink = response.findLink(relation: "first")
+    XCTAssertEqual(foundFirstLink, firstLink)
+    
+  }
 }
 
 class LinkHTMLTests: XCTestCase {

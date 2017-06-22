@@ -84,11 +84,30 @@ extension Link {
 - parameter header: RFC5988 link header. For example `<?page=3>; rel=\"next\", <?page=1>; rel=\"prev\"`
 :return: An array of Links
 */
+
+let linkParserRegex = try! NSRegularExpression(pattern:"(\\/?[^>]*>;? ?\\w+=\"\\/?[^>]*\"),?")
+
 public func parseLink(header: String) -> [Link] {
+  
+  let nsString = header as NSString
+  let results = linkParserRegex.matches(in: header, range: NSRange(location: 0, length: nsString.length))
+  let mapResults =  results.map { match -> String in
+    //last match
+    if match.numberOfRanges == 2{
+      return nsString.substring(with: match.rangeAt(1))
+    }
+    return nsString.substring(with: match.range)
+  }
+  return mapResults.map{
+    return Link(header: $0)
+  }
+}
+
+/*public func parseLink(header: String) -> [Link] {
   return separateBy(",")(header).map { string in
     return Link(header: string)
   }
-}
+}*/
 
 /// An extension to NSHTTPURLResponse adding a links property
 extension HTTPURLResponse {
